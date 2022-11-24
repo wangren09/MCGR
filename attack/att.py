@@ -200,7 +200,47 @@ def pgd_l0(model, X,y, epsilon = 12, alpha = 1, num_iter = 0, device = "cuda:1")
     delta.data = torch.min(torch.max(delta.detach(), -X), 1-X) # clip X+delta to [0,1]
 
     return delta.detach()
+from attack.autopgd_train import pgd_1
+def msd_v1(model, X,y, epsilon_l_inf = 0.03, epsilon_l_2= 1., epsilon_l_1 = 12.,
+                alpha_l_inf = 0.003, alpha_l_2 = 0.05, alpha_l_1 = 0.4, num_iter = 10, device = "cuda:0",**kwargs):
+    delta = torch.zeros_like(X,requires_grad = True)
+    max_delta = torch.zeros_like(X)
+    max_max_delta = torch.zeros_like(X)
+    max_loss = torch.zeros(y.shape[0]).to(y.device).half()
+    max_max_loss = torch.zeros(y.shape[0]).to(y.device).half()
 
+
+    for t in range(num_iter):
+        loss = nn.CrossEntropyLoss()(model(X + delta,**kwargs), y)
+        loss.backward()
+        # For L1
+        delta_l_1 = pgd_1(model, X + delta, y, eps=epsilon_l_1, n_iter=1, alpha=alpha_l_1, **kwargs) - X
+        with torch.no_grad():
+            #For L_2
+
+            delta_l_2  = delta.data + alpha_l_2*delta.grad / norms(delta.grad)
+            delta_l_2 *= epsilon_l_2 / norms(delta_l_2).clamp(min=epsilon_l_2)
+            delta_l_2  = torch.min(torch.max(delta_l_2, -X), 1-X) # clip X+delta to [0,1]
+
+            #For L_inf
+            delta_l_inf=  (delta.data + alpha_l_inf*delta.grad.sign()).clamp(-epsilon_l_inf,epsilon_l_inf)
+            delta_l_inf = torch.min(torch.max(delta_l_inf, -X), 1-X) # clip X+delta to [0,1]
+
+
+            #Compare
+            delta_tup = (delta_l_1, delta_l_2, delta_l_inf)
+            ##delta_tup = (delta_l_inf,delta_l_1)
+            max_loss = torch.zeros(y.shape[0]).to(y.device).half()
+            for delta_temp in delta_tup:
+                loss_temp = nn.CrossEntropyLoss(reduction = 'none')(model(X + delta_temp,**kwargs), y)
+                max_delta[loss_temp >= max_loss] = delta_temp[loss_temp >= max_loss]
+                max_loss = torch.max(max_loss, loss_temp)
+            delta.data = max_delta.data
+            max_max_delta[max_loss> max_max_loss] = max_delta[max_loss> max_max_loss]
+            max_max_loss[max_loss> max_max_loss] = max_loss[max_loss> max_max_loss].half()
+        delta.grad.zero_()
+
+    return max_max_delta
 def msd_v0(model, X,y, epsilon_l_inf = 0.03, epsilon_l_2= 0.5, epsilon_l_1 = 12,
                 alpha_l_inf = 0.003, alpha_l_2 = 0.05, alpha_l_1 = 0.05, num_iter = 50, device = "cuda:0",**kwargs):
     delta = torch.zeros_like(X,requires_grad = True)

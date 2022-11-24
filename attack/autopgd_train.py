@@ -309,35 +309,70 @@ def apgd_train(model, x, y, norm, eps, n_iter=10, use_rs=False, loss='ce',
     return x_best, acc, loss_best, x_best_adv
 
 
-if __name__ == '__main__':
-    #pass
-    from train_new import parse_args
-    from data import load_anydataset
-    from utils_eval import check_imgs, load_anymodel_datasets, clean_accuracy
+def pgd_1(model, x, y, eps=12.0, n_iter=10,alpha=0.4,**kwargs):
+    device = x.device
+    ndims = len(x.shape) - 1
+    x_adv = x.clone()
+    n_fts = math.prod(x.shape[1:])
+    x_adv = x_adv.clamp(0., 1.)
+    loss_best_steps = torch.zeros([n_iter + 1, x.shape[0]], device=device)
+    acc_steps = torch.zeros_like(loss_best_steps)
+    # set loss
+    criterion_indiv = criterion_dict['ce']
+    k = max(int(.04 * n_iter), 1)
+    init_topk = .05
+    topk = init_topk * torch.ones([x.shape[0]], device=device)
+    step_size = alpha * eps * torch.ones([x.shape[0], *[1] * ndims],
+                                         device=device)
+    x_adv.requires_grad_()
+    # grad = torch.zeros_like(x)
+    # for _ in range(self.eot_iter)
+    # with torch.enable_grad()
+    logits = model(x_adv,**kwargs)
+    loss_indiv = criterion_indiv(logits, y)
+    loss = loss_indiv.sum()
+    # grad += torch.autograd.grad(loss, [x_adv])[0].detach()
+    grad = torch.autograd.grad(loss, [x_adv])[0].detach()
+    x_adv.detach_()
+    loss_indiv.detach_()
+    loss.detach_()
 
-    args = parse_args()
-    args.training_set = False
-    
-    x_test, y_test = load_anydataset(args, device='cpu')
-    x, y = x_test.cuda(), y_test.cuda()
-    model, l_models = load_anymodel_datasets(args)
+    acc = logits.detach().max(1)[1] == y
+    acc_steps[0] = acc + 0
 
-    assert not model.training
 
-    if args.attack == 'apgd_train':
-        #with torch.no_grad()
-        x_best, acc, _, x_adv = apgd_train(model, x, y, norm=args.norm,
-            eps=args.eps, n_iter=args.n_iter, verbose=True, loss='ce')
-        check_imgs(x_adv, x, args.norm)
+    u = torch.arange(x.shape[0], device=device)
 
-    elif args.attack == 'apgd_test':
-        from autoattack import AutoAttack
-        adversary = AutoAttack(model, norm=args.norm, eps=args.eps)
-        #adversary.attacks_to_run = ['apgd-ce']
-        #adversary.apgd.verbose = True
-        with torch.no_grad():
-            x_adv = adversary.run_standard_evaluation(x, y, bs=1000)
-        check_imgs(x_adv, x, args.norm)
-
+    for i in range(n_iter):
+        x_adv = x_adv.detach()
+        x_adv_old = x_adv.clone()
+        grad_topk = grad.abs().view(x.shape[0], -1).sort(-1)[0]
+        topk_curr = torch.clamp((1. - topk) * n_fts, min=0, max=n_fts - 1).long()
+        grad_topk = grad_topk[u, topk_curr].view(-1, *[1] * (len(x.shape) - 1))
+        sparsegrad = grad * (grad.abs() >= grad_topk).float()
+        x_adv_1 = x_adv + step_size * sparsegrad.sign() / (
+                sparsegrad.sign().abs().view(x.shape[0], -1).sum(dim=-1).view(
+                    -1, 1, 1, 1) + 1e-10)
+        delta_u = x_adv_1 - x
+        delta_p = L1_projection(x, delta_u, eps)
+        x_adv_1 = x + delta_u + delta_p
+        x_adv = x_adv_1 + 0.
+        ### get gradient
+        x_adv.requires_grad_()
+        # grad = torch.zeros_like(x)
+        # for _ in range(self.eot_iter)
+        # with torch.enable_grad()
+        logits = model(x_adv,**kwargs)
+        loss_indiv = criterion_indiv(logits, y)
+        loss = loss_indiv.sum()
+        # grad += torch.autograd.grad(loss, [x_adv])[0].detach()
+        if i < n_iter - 1:
+            # save one backward pass
+            grad = torch.autograd.grad(loss, [x_adv])[0].detach()
+        # grad /= float(self.eot_iter)
+        x_adv.detach_()
+        loss_indiv.detach_()
+        loss.detach_()
+    return x_adv
 
 
