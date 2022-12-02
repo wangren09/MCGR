@@ -5,9 +5,10 @@ import d
 import models
 import attack.pgd as pgd
 import attack.pgd2 as pgd2
-from attack.att import *
 from tqdm import tqdm
-from attack.autopgd_train import apgd_train
+from attack.autopgd_train import apgd_train,pgd_1
+from attack.att import  msd_v1,msd_v0,l1_dir_topk,pgd_l1_topk
+
 parser = argparse.ArgumentParser(description='DNN curve training')
 parser.add_argument('--dir', type=str, default='/tmp/curve/', metavar='DIR',
                     help='training directory (default: /tmp/curve/)')
@@ -73,7 +74,7 @@ else:
             print('Linear initialization.')
             model.init_linear()
 #model.load_state_dict(torch.load('./save/pgd/checkpoint-150.pt')['model_state'])
-model.load_state_dict(torch.load('./save/msd/checkpoint-200.pt')['model_state'])
+model.load_state_dict(torch.load('./save/msd3-test/checkpoint-50.pt')['model_state'])
 model.cuda()
 model.eval()
 
@@ -85,7 +86,17 @@ for data in tqdm(data_loader_test):
     _, pred = torch.max(outputs.data, 1)
     test_correct += torch.sum(pred == y_test.data)
 print("Test Accuracy is:{:.4f}%".format(100 * test_correct / len(D.data_test)))
-'''
+
+correct=0
+for data in tqdm(data_loader_test):
+    X_test, y_test = data
+    X_test, y_test = X_test.to(device), y_test.to(device)
+    X_test= pgd_1(model, X_test, y_test,eps=12, n_iter=10)
+    outputs = model(X_test)
+    _, pred = torch.max(outputs.data, 1)
+    correct += torch.sum(pred == y_test.data)
+print("Test Accuracy after AT1-slide is:{:.4f}%".format(100 * correct / len(D.data_test)))
+
 correct=0
 for data in tqdm(data_loader_test):
     X_test, y_test = data
@@ -94,7 +105,7 @@ for data in tqdm(data_loader_test):
     outputs = model(X_test)
     _, pred = torch.max(outputs.data, 1)
     correct += torch.sum(pred == y_test.data)
-print("Test Accuracy after AT1 is:{:.4f}%".format(100 * correct / len(D.data_test)))
+print("Test Accuracy after AT1-auto is:{:.4f}%".format(100 * correct / len(D.data_test)))
 
 correct=0
 for data in tqdm(data_loader_test):
@@ -105,7 +116,7 @@ for data in tqdm(data_loader_test):
     _, pred = torch.max(outputs.data, 1)
     correct += torch.sum(pred == y_test.data)
 print("Test Accuracy after AT1 is:{:.4f}%".format(100 * correct / len(D.data_test)))
-'''
+
 
 
 at=pgd.PGD()

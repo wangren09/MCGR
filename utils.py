@@ -6,8 +6,8 @@ import torch
 import curves
 import attack.pgd as pgd
 import attack.pgd2 as pgd2
-from attack.att import *
-
+from attack.att import msd_v1,msd_v0
+from attack.autopgd_train import apgd_train,pgd_1
 def l2_regularizer(weight_decay):
     def regularizer(model):
         l2 = 0.0
@@ -64,10 +64,11 @@ def train(train_loader, model, optimizer, criterion, regularizer=None, lr_schedu
             input = at.generate(model, input, target, None, 0)
             model.train()
         if pgdtype=='1':
-            input+=pgd_l1_topk(model,input,target, epsilon=12, alpha=0.05, num_iter = 50, device = "cuda:0", restarts = 0, version = 0)
+            input=pgd_1(model, input, target,eps=12, n_iter=10)
+            model.train()
         if pgdtype=='msd':
-            input += msd_v0(model,input,target,epsilon_l_inf = 8/255, epsilon_l_2= 1, epsilon_l_1 = 12,
-                alpha_l_inf = 0.003, alpha_l_2 = 0.2, alpha_l_1 = 0.05, num_iter = 50, device = "cuda:0")
+            input += msd_v1(model,input,target,epsilon_l_inf = 8/255, epsilon_l_2= 1, epsilon_l_1 = 12,
+                alpha_l_inf = 0.003, alpha_l_2 = 0.2, alpha_l_1 = 0.4, num_iter = 10, device = "cuda:0")
             model.train()
         output = model(input)
         loss = criterion(output, target)
