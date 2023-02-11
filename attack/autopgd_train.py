@@ -104,7 +104,7 @@ def check_oscillation(x, j, k, y5, k3=0.75):
         return (t <= k * k3 * torch.ones_like(t)).float()
 
 def apgd_train(model, x, y, norm, eps, n_iter=10, use_rs=False, loss='ce',
-    verbose=False, is_train=True):
+    verbose=False, is_train=True,**kwargs):
     assert not model.training
     device = x.device
     ndims = len(x.shape) - 1
@@ -152,7 +152,7 @@ def apgd_train(model, x, y, norm, eps, n_iter=10, use_rs=False, loss='ce',
     #grad = torch.zeros_like(x)
     #for _ in range(self.eot_iter)
     #with torch.enable_grad()
-    logits = model(x_adv)
+    logits = model(x_adv,**kwargs)
     loss_indiv = criterion_indiv(logits, y)
     loss = loss_indiv.sum()
     #grad += torch.autograd.grad(loss, [x_adv])[0].detach()
@@ -231,7 +231,7 @@ def apgd_train(model, x, y, norm, eps, n_iter=10, use_rs=False, loss='ce',
         #grad = torch.zeros_like(x)
         #for _ in range(self.eot_iter)
         #with torch.enable_grad()
-        logits = model(x_adv)
+        logits = model(x_adv,**kwargs)
         loss_indiv = criterion_indiv(logits, y)
         loss = loss_indiv.sum()
         

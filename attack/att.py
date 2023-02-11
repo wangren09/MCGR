@@ -34,7 +34,7 @@ pgd_l2  : epsilon =0.5, alpha=0.05, num_iter = 50
 
 '''
 
-def pgd_l2(model, X, y, epsilon=0.5, alpha=0.05, num_iter = 50, device = "cuda:0", restarts = 0, version = 0):
+def pgd_l2(model, X, y, epsilon=0.5, alpha=0.05, num_iter = 10, device = "cuda:0", restarts = 0, version = 0):
     max_delta = torch.zeros_like(X)
     delta = torch.zeros_like(X, requires_grad = True)
     for t in range(num_iter):
@@ -128,7 +128,7 @@ def pgd_l1_topk(model, X,y, epsilon = 12, alpha = 0.05, num_iter = 50, k = 20, d
 
     return max_delta
 
-def pgd_linf(model, X, y, epsilon=0.03, alpha=0.003, num_iter = 40, device = "cuda:0", restarts = 0, version = 0,**kwargs):
+def pgd_linf(model, X, y, epsilon=0.03, alpha=0.003, num_iter = 10, device = "cuda:0", restarts = 0, version = 0,**kwargs):
     """ Construct FGSM adversarial examples on the examples X"""
     max_delta = torch.zeros_like(X)
     delta = torch.zeros_like(X, requires_grad=True)
@@ -255,25 +255,25 @@ def msd_v0(model, X,y, epsilon_l_inf = 0.03, epsilon_l_2= 0.5, epsilon_l_1 = 12,
         loss.backward()
         with torch.no_grad():
             #For L_2
-
+            
             delta_l_2  = delta.data + alpha_l_2*delta.grad / norms(delta.grad)
             delta_l_2 *= epsilon_l_2 / norms(delta_l_2).clamp(min=epsilon_l_2)
             delta_l_2  = torch.min(torch.max(delta_l_2, -X), 1-X) # clip X+delta to [0,1]
-
+            
             #For L_inf
             delta_l_inf=  (delta.data + alpha_l_inf*delta.grad.sign()).clamp(-epsilon_l_inf,epsilon_l_inf)
             delta_l_inf = torch.min(torch.max(delta_l_inf, -X), 1-X) # clip X+delta to [0,1]
-
+            
             #For L1
             k = random.randint(5,20)
             alpha_l_1 = (alpha_l_1_default/k)*20
             delta_l_1  = delta.data + alpha_l_1*l1_dir_topk(delta.grad, delta.data, X, alpha_l_1, k = k)
             delta_l_1 = proj_l1ball(delta_l_1, epsilon_l_1, device)
             delta_l_1  = torch.min(torch.max(delta_l_1, -X), 1-X) # clip X+delta to [0,1]
-
             #Compare
             delta_tup = (delta_l_1, delta_l_2, delta_l_inf)
-            ##delta_tup = (delta_l_inf,delta_l_1)
+            
+            #delta_tup = (delta_l_inf,delta_l_1)
             max_loss = torch.zeros(y.shape[0]).to(y.device).half()
             for delta_temp in delta_tup:
                 loss_temp = nn.CrossEntropyLoss(reduction = 'none')(model(X + delta_temp,**kwargs), y)
