@@ -76,24 +76,28 @@ if __name__ == '__main__':
     checkpoint = torch.load(args.ckpt)
     model.load_state_dict(checkpoint['model_state'])
     T = args.num_points
-    columns = ['t','Test clean acc','Test pgd_inf acc','Test pgd_2 acc','Train clean loss','Train pgd_inf loss','Train pgd_2 loss']
+    columns = ['t','Test clean acc','Test pgd_inf acc','Test pgd_2 acc','Test pgd1_acc','Train clean loss','Train pgd_inf loss','Train pgd_2 loss','Train pgd_1 loss']
     ts = np.linspace(0.0, 1.0, T)
 
     teca=np.zeros(T)
     teia = np.zeros(T)
     te2a = np.zeros(T)
+    te1a= np.zeros(T)
 
     tecl = np.zeros(T)
     teil = np.zeros(T)
     te2l = np.zeros(T)
+    te1l= np.zeros(T)
 
     trca = np.zeros(T)
     tria = np.zeros(T)
     tr2a = np.zeros(T)
+    tr1a= np.zeros(T)
 
     trcl = np.zeros(T)
     tril = np.zeros(T)
     tr2l = np.zeros(T)
+    tr1l= np.zeros(T)
 
     t = torch.FloatTensor([0.0]).cuda()
     f = open(args.dir+'/log.csv', 'w')
@@ -101,8 +105,8 @@ if __name__ == '__main__':
     for i, t_value in enumerate(ts):
         t.data.fill_(t_value)
         utils.update_bn(loaders['train'], model, t=t)
-        teca[i],teia[i],te2a[i],tecl[i],teil[i],te2l[i],trca[i],tria[i],tr2a[i],trcl[i],tril[i],tr2l[i]=pgdtest.test(model,0,t=t)
-        values = [t,teca[i],teia[i],te2a[i],trcl[i],tril[i],tr2l[i]]
+        teca[i],teia[i],te2a[i],tecl[i],teil[i],te2l[i],trca[i],tria[i],tr2a[i],trcl[i],tril[i],tr2l[i],te1a[i],te1l[i],tr1a[i],tr1l[i]=pgdtest.test(model,0,t=t)
+        values = [t,teca[i],teia[i],te2a[i],te1a[i],trcl[i],tril[i],tr2l[i],tr1l[i]]
         table = tabulate.tabulate([values], columns, tablefmt='simple', floatfmt='10.4f')
         if i % 40 == 0:
             table = table.split('\n')
@@ -112,10 +116,10 @@ if __name__ == '__main__':
         print(table)
     with f:
         write = csv.writer(f)
-        write.writerow(['t','test clean acc','test pgd_inf acc','test pgd_2 acc','test clean loss','test pgd_inf loss','test pgd_2 loss',\
-                            'train clean acc','train pgd_inf acc','train pgd_2 acc','train clean loss','train pgd_inf loss','train pgd_2 loss'])
+        write.writerow(['t','test clean acc','test pgd_inf acc','test pgd_2 acc','test pgd_1 acc','test clean loss','test pgd_inf loss','test pgd_2 loss','test pgd_1 loss',\
+                            'train clean acc','train pgd_inf acc','train pgd_2 acc','train pgd_1 acc','train clean loss','train pgd_inf loss','train pgd_2 loss','train pgd_1 loss'])
         for i in range(T):
-            values=[ts[i],teca[i],teia[i],te2a[i],tecl[i],teil[i],te2l[i],trca[i],tria[i],tr2a[i],trcl[i],tril[i],tr2l[i]]
+            values=[ts[i],teca[i],teia[i],te2a[i],te1a[i],tecl[i],teil[i],te2l[i],te1l[i],trca[i],tria[i],tr2a[i],tr1a[i],trcl[i],tril[i],tr2l[i],tr1l[i]]
             write.writerow(values)
 
 
