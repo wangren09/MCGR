@@ -7,19 +7,33 @@ from attack.att import *
 from tqdm import tqdm
 
 class PGDTest():
-    def __init__(self):
-        self.data_train = datasets.CIFAR10(root='./data/cifar10', train=True,
-                                     download=True, transform=transforms.Compose([transforms.ToTensor()]))
-        self.data_loader_train = torch.utils.data.DataLoader(dataset=self.data_train,
-                                                       batch_size=128,
-                                                       shuffle=True,
-                                                       num_workers=8)
-        self.data_test = datasets.CIFAR10(root='./data/cifar10', train=False,
-                                     download=True, transform=transforms.Compose([transforms.ToTensor()]))
-        self.data_loader_test = torch.utils.data.DataLoader(dataset=self.data_test,
-                                                       batch_size=128,
-                                                       shuffle=True,
-                                                       num_workers=8)
+    def __init__(self,dataset):
+        if dataset=='CIFAR100':
+            self.data_train = datasets.CIFAR100(root='./data/cifar10', train=True,
+                                         download=True, transform=transforms.Compose([transforms.ToTensor()]))
+            self.data_loader_train = torch.utils.data.DataLoader(dataset=self.data_train,
+                                                           batch_size=128,
+                                                           shuffle=True,
+                                                           num_workers=8)
+            self.data_test = datasets.CIFAR100(root='./data/cifar10', train=False,
+                                         download=True, transform=transforms.Compose([transforms.ToTensor()]))
+            self.data_loader_test = torch.utils.data.DataLoader(dataset=self.data_test,
+                                                           batch_size=128,
+                                                           shuffle=True,
+                                                           num_workers=8)
+        else:
+            self.data_train = datasets.CIFAR10(root='./data/cifar10', train=True,
+                                         download=True, transform=transforms.Compose([transforms.ToTensor()]))
+            self.data_loader_train = torch.utils.data.DataLoader(dataset=self.data_train,
+                                                           batch_size=128,
+                                                           shuffle=True,
+                                                           num_workers=8)
+            self.data_test = datasets.CIFAR10(root='./data/cifar10', train=False,
+                                         download=True, transform=transforms.Compose([transforms.ToTensor()]))
+            self.data_loader_test = torch.utils.data.DataLoader(dataset=self.data_test,
+                                                           batch_size=128,
+                                                           shuffle=True,
+                                                           num_workers=8)
     def test_once(self,model,train,device,pgdtype,**kwargs):
         correct = 0
         cost = torch.nn.CrossEntropyLoss()
@@ -57,7 +71,7 @@ class PGDTest():
         
         trca, trcl = self.test_once(model, True, device, '0', **kwargs)
         tria, tril = self.test_once(model, True, device, 'inf', **kwargs)
-        tr2a, tr2l = self.test_once(model, True, device, '1', **kwargs)
+        tr1a, tr1l = self.test_once(model, True, device, '1', **kwargs)
         tr2a, tr2l = self.test_once(model, True, device, '2', **kwargs)
 
         return teca,teia,te2a,tecl,teil,te2l,trca,tria,tr2a,trcl,tril,tr2l,te1a,te1l,tr1a,tr1l
