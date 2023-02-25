@@ -71,7 +71,7 @@ if __name__ == '__main__':
         args.num_bends,
         architecture_kwargs=architecture.kwargs,
     )
-    pgdtest=pgdtest.PGDTest()
+    pgdtest=pgdtest2.PGDTest()
     model.cuda()
     checkpoint = torch.load(args.ckpt)
     model.load_state_dict(checkpoint['model_state'])
@@ -106,7 +106,7 @@ if __name__ == '__main__':
         t.data.fill_(t_value)
         utils.update_bn(loaders['train'], model, t=t)
         teca[i],teia[i],te2a[i],tecl[i],teil[i],te2l[i],trca[i],tria[i],tr2a[i],trcl[i],tril[i],tr2l[i],te1a[i],te1l[i],tr1a[i],tr1l[i]=pgdtest.test(model,0,t=t)
-        values = [t,teca[i],teia[i],te2a[i],te1a[i],trcl[i],tril[i],tr2l[i],tr1l[i]]
+        values = [t,teca[i],teia[i],te2a[i],te1a[i],trcl[i],tril[i],tr2l[i],tr1a[i]]
         table = tabulate.tabulate([values], columns, tablefmt='simple', floatfmt='10.4f')
         if i % 40 == 0:
             table = table.split('\n')

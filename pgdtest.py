@@ -57,7 +57,7 @@ class PGDTest():
         
         trca, trcl = self.test_once(model, True, device, '0', **kwargs)
         tria, tril = self.test_once(model, True, device, 'inf', **kwargs)
-        tr1a, tr1l = self.test_once(model, True, device, '1', **kwargs)
+        tr2a, tr2l = self.test_once(model, True, device, '1', **kwargs)
         tr2a, tr2l = self.test_once(model, True, device, '2', **kwargs)
 
         return teca,teia,te2a,tecl,teil,te2l,trca,tria,tr2a,trcl,tril,tr2l,te1a,te1l,tr1a,tr1l
