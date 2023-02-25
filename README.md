@@ -34,7 +34,7 @@ Parameters:
 * ```PATH``` &mdash; path to the data directory
 * ```TRANSFORM``` &mdash; type of data transformation [ResNet] 
 * ```MODEL``` &mdash; DNN model name: 
-    - PreResNet110/PreResNet164
+    - PreResNet110
     - WideResNet28x10
 * ```EPOCHS``` &mdash; number of training epochs 
 * ```LR_INIT``` &mdash; initial learning rate
@@ -46,7 +46,7 @@ Use the `--use_test` flag if you want to use the test set instead of validation 
 For example, use the following commands to train PreResNet or WideResNet :
 ```bash
 #PreResNet
-python train.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --data_path=<PATH>  --model=[PreResNet110 or PreResNet164] --epochs=150  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
+python train.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --data_path=<PATH>  --model=PreResNet110 --epochs=150  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
 
 #WideResNet28x10 
 python train.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --data_path=<PATH> --model=WideResNet28x10 --epochs=200 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
