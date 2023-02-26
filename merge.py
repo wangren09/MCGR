@@ -3,7 +3,6 @@ import argparse
 import numpy as np
 import os
 import tabulate
-import pgdtest
 import models
 import curves
 import utils
@@ -73,7 +72,6 @@ if __name__ == '__main__':
         args.num_bends,
         architecture_kwargs=architecture.kwargs,
     )
-    pgdtest=pgdtest.PGDTest()
     model.cuda()
     checkpoint = torch.load(args.ckpt)
     model.load_state_dict(checkpoint['model_state'])
@@ -115,7 +113,7 @@ if __name__ == '__main__':
     model1.load_state_dict(m1)
     utils.save_checkpoint(
         args.dir,
-        50,
+        0,
         model_state=model1.state_dict()
     )
     print('done!')
