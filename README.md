@@ -177,7 +177,17 @@ For example, use the following commands to train PreResNet:
 python train_.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --data_path=data --model=PreResNet110 --epochs=50 --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
 ```
 
+## Refer to this Repo.
+If you use this code, please cite the following reference
 
+```
+@article{wang2023robust,
+  title={Robust Mode Connectivity-Oriented Adversarial Defense: Enhancing Neural Network Robustness Against Diversified $$\backslash$ell\_p $ Attacks},
+  author={Wang, Ren and Li, Yuxuan and Liu, Sijia},
+  journal={arXiv preprint arXiv:2303.10225},
+  year={2023}
+}
+```
 
 
 
