@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     weights_dict = {}
     for k, v in weights.items():
-        new_k = k.replace('module.', '') if 'module' in k else k
+        new_k = k.replace('module.', '') if 'module.' in key and if len(args.gpus)==0 else k
         weights_dict[new_k] = v
 
     model.load_state_dict(weights_dict)

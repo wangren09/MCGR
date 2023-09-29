@@ -200,7 +200,7 @@ def update_bn(loader, model, **kwargs):
         if 't' in kwargs:
             t = kwargs['t']
             t = float(t.item())
-            model(**dict(input=x_batch,t=t))
+            model(**dict(input=input,t=t))
         else:
             model(input, **kwargs)
         num_samples += batch_size
