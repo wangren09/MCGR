@@ -1,11 +1,6 @@
-# Dependencies
-* [PyTorch](http://pytorch.org/)
-* [torchvision](https://github.com/pytorch/vision/)
-* [tabulate](https://pypi.python.org/pypi/tabulate/)
-
 # Usage
 
-The code in this repository implements both the RMC and SRMC, with examples on the CIFAR-10 and CIFAR-100 datasets.
+The code in this repository implements both the RMC and SRMC .
 
 ## Curve Finding
 
@@ -21,9 +16,11 @@ python  train.py --dir=<DIR> \
                  --transform=<TRANSFORM> \
                  --model=<MODEL> \
                  --epochs=<EPOCHS> \
+                 --batch_size=<BS> \
                  --lr=<LR_INIT> \
                  --wd=<WD> \
                  --pgd=<PGD>
+                 --gpus=<GPUS>
                  [--use_test]
 ```
 
@@ -32,24 +29,30 @@ Parameters:
 * ```DIR``` &mdash; path to training directory where checkpoints will be stored
 * ```DATASET``` &mdash; dataset name [CIFAR10/CIFAR100] 
 * ```PATH``` &mdash; path to the data directory
-* ```TRANSFORM``` &mdash; type of data transformation [ResNet] 
-* ```MODEL``` &mdash; DNN model name: 
-    - PreResNet110
-    - WideResNet28x10
+* ```TRANSFORM``` &mdash; type of data transformation [VGG/ResNet] 
+* ```MODEL``` &mdash; DNN model name:
+    - VGG16/VGG16BN/VGG19/VGG19BN 
+    - PreResNet110/PreResNet164
+    - SimpleViT
 * ```EPOCHS``` &mdash; number of training epochs 
 * ```LR_INIT``` &mdash; initial learning rate
+* ```batch_size``` &mdash; batch size 
 * ```WD``` &mdash; weight decay 
 * ```PGD``` &mdash; type of pgd attack[1/2/inf/msd]
+* ```GPUS```—id of gpus
 
 Use the `--use_test` flag if you want to use the test set instead of validation set (formed from the last 5000 training objects) to evaluate performance.
 
-For example, use the following commands to train PreResNet or WideResNet :
+For example, use the following commands to train PreResNet  , WideResNet or ViT :
 ```bash
 #PreResNet
-python train.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --data_path=<PATH>  --model=PreResNet110 --epochs=150  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
+python train.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100/ImageNet100] --data_path=<PATH>  --model=[PreResNet110 or PreResNet164] --epochs=150 --batch_size=128  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --gpus=0,1,2,3
 
-#WideResNet28x10 
-python train.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --data_path=<PATH> --model=WideResNet28x10 --epochs=200 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
+#WideResNet
+train.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=WideResNet28x10 --epochs=200 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
+
+#ViT
+python train.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT --epochs=150 --lr=0.001 --wd=1e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
 ```
 
 ### Training the curves
@@ -65,6 +68,7 @@ python  train.py --dir=<DIR> \
                  --epochs=<EPOCHS> \
                  --lr=<LR_INIT> \
                  --wd=<WD> \
+                 --batch_size=<BS> \
                  --curve=<CURVE>[Bezier|PolyChain] \
                  --num_bends=<N_BENDS> \
                  --init_start=<CKPT1> \ 
@@ -83,13 +87,16 @@ Parameters:
 
 Use the flags `--fix_end --fix_start` if you want to fix the positions of the endpoints; otherwise the endpoints will be updated during training. See the section on [training the endpoints] for the description of the other parameters.
 
-For example, use the following commands to train PreResNet or  WideResNet:
+For example, use the following commands to train VGG16 or PreResNet :
 ```bash
 #PreResNet
-python  train.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --use_test --transform=ResNet --data_path=<PATH> --model=PreResNet110 --curve=[Bezier|PolyChain] --num_bends=3  --init_start=<CKPT1> --init_end=<CKPT2> --fix_start --fix_end --epochs=200 --lr=0.03 --wd=3e-4 --pgd=[1/2/inf/msd]
+python  train.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100/ImageNet100] --use_test --transform=ResNet --data_path=<PATH> --model=PreResNet110 --curve=[Bezier|PolyChain] --num_bends=3  --init_start=<CKPT1> --init_end=<CKPT2> --fix_start --fix_end --epochs=200 --batch_size=128  --lr=0.03 --wd=3e-4 --pgd=[1/2/inf/msd]
 
-#WideResNet28x10
-python3 train.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --use_test --transform=ResNet --data_path=<PATH> --model=WideResNet28x10 --curve=[Bezier|PolyChain] --num_bends=3  --init_start=<CKPT1> --init_end=<CKPT2> --fix_start --fix_end --epochs=200 --lr=0.03 --wd=5e-4 --pgd=[1/2/inf/msd]
+#WideResNet
+python  train.py --dir=<DIR>  --dataset=CIFAR10 --use_test --transform=ResNet --data_path=./data --model=WideResNet28x10 --curve=Bezier --num_bends=3 --init_start=<CKPT1> --init_end=<CKPT2>--fix_start --fix_end --epochs=100 --lr=0.03 --wd=5e-4 --pgd=[1/2/inf/msd]
+
+#ViT
+python  train.py --dir=<DIR> --dataset=CIFAR10 --use_test --transform=ResNet --data_path=./data --model=ViT --curve=Bezier --num_bends=3  --init_start=<CKPT1> --init_end=<CKPT2> --fix_start --fix_end --epochs=50 --lr=0.001 --wd=3e-4 --pgd=[1/2/inf/msd]
 ```
 
 ### Evaluating the curves
@@ -101,35 +108,33 @@ python  eval_curve_pgd.py    --dir=<DIR> \
                              --data_path=<PATH> \
                              --transform=<TRANSFORM>
                              --model=<MODEL> \
-                             --wd=<WD> \
+                             --batch_size=<BS> \
                              --curve=<CURVE>[Bezier|PolyChain] \
                              --num_bends=<N_BENDS> \
                              --ckpt=<CKPT> \ 
                              --num_points=<NUM_POINTS> \
-                             [--use_test]
+                             --
 ```
 Parameters
 * ```CKPT``` &mdash; path to the curves checkpoint saved by `train.py`
 * ```NUM_POINTS``` &mdash; number of points along the curve to use for evaluation (default: 61)
 
-See the sections on [training the endpoints] and [training the curves] for the description of other parameters.
+See the sections on [training the endpoints]and [training the curves] for the description of other parameters.
 
 `eval_curve.py` outputs the statistics on train and test loss and accuracy along the curve. 
 
-For example, use the following commands to train PreResNet:
-
 ```bash
-python eval_curve_pgd.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100]  --data_path=[PATH]  --transform=ResNet     --model=PreResNet110   --curve=Bezier     --num_bends=3         --ckpt=<CKPT>    --num_points=61          --use_test
+python  eval_curve_pgd.py    --dir=<DIR> --dataset=[CIFAR10/CIFAR100/ImageNet100] --data_path=<PATH> --transform=PreResNet --model=[PreResNet110/WideResNet28x10/ViT] --batch_size=128  --curve=Bezier--num_bends=3 --ckpt=<CKPT>  --num_points=61
 ```
 
 
 
-### Selecting the point from  curves
+### Merging the curves
 
 To merge the trained curves into an endpoint at t=T, you can use the following command
 
 ```bash
-python merge.py --ckpt=<CKPT> --transform=<TRANSFORM> --model=<MODEL> --t=[0.0<=T<=1.0] --dir=<DIR>
+python merge.py --ckpt=<CKPT> --t=[0.0<=T<=1.0] --dir=<DIR>
 ```
 
 Parameters
@@ -137,12 +142,10 @@ Parameters
 * ```CKPT``` &mdash; path to the curves checkpoint saved by `train.py`
 * ```T``` &mdash; where the point you want to get from the curves
 
-See the sections on [training the endpoints] and [training the curves] for the description of other parameters.
-
-For example, use the following commands to select the point from PreResNet curves:
+See the sections on [training the endpoints]and [training the curves] for the description of other parameters.
 
 ```bash
-python merge.py --ckpt=<CKPT> --transform=ResNet --model=PreResNet110 --t=[0.0<=T<=1.0] --dir=<DIR>
+python merge.py --ckpt=<CKPT>  --t=0.1 --dir=./mergesave/rmc3/0.1
 ```
 
 
@@ -169,27 +172,16 @@ Parameters
 
 * ```CKPT``` &mdash; path to the existed endpoint merged from curves saved by `merge.py`
 
-See the sections on [training the endpoints] and [training the curves] for the description of other parameters.
-
-For example, use the following commands to train PreResNet:
+See the sections on [training the endpoints] for the description of other parameters.
 
 ```bash
-python train_.py --dir=<DIR> --dataset=[CIFAR10 or CIFAR100] --data_path=data --model=PreResNet110 --epochs=50 --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+#PreResNet
+python train_.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100/ImageNet100] --data_path=<PATH>  --model=[PreResNet110 or PreResNet164] --epochs=150 --batch_size=128  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+
+#WideResNet
+train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=WideResNet28x10 --epochs=200 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+
+#ViT
+python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT --epochs=150 --lr=0.001 --wd=1e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]  --origin_model=<CKPT>
 ```
-
-### Refer to this Repo.
-If you use this code, please cite the following reference
-
-```
-@article{wang2023robust,
-  title={Robust Mode Connectivity-Oriented Adversarial Defense: Enhancing Neural Network Robustness Against Diversified $$\backslash$ell\_p $ Attacks},
-  author={Wang, Ren and Li, Yuxuan and Liu, Sijia},
-  journal={arXiv preprint arXiv:2303.10225},
-  year={2023}
-}
-```
-
-
-
-
 
