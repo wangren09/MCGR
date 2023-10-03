@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     weights = checkpoint['model_state']
                     weights_dict = {}
                     for key, value in weights.items():
-                        new_k = key.replace('module', '') if 'module.' in key and if len(args.gpus)==0 else key
+                        new_k = key.replace('module', '') if 'module.' in key  else key
                         weights_dict[new_k] = value
                     base_model.load_state_dict(weights_dict)
                     model.import_base_parameters(base_model, k)
