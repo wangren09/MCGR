@@ -87,7 +87,7 @@ def train(train_loader, model, optimizer, criterion, regularizer=None, lr_schedu
                 alpha_l_inf = 2/255, alpha_l_2 = 0.2, alpha_l_1 = 0.05, num_iter = 10, device = "cuda:0")
             model.train()
         if curveflag:
-            output = model(**dict(input=input, t=t))
+            output = model(**dict(input=input, t=float(t.item())))
         else:
             output = model(input)
         loss = criterion(output, target)
