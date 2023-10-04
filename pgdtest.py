@@ -11,7 +11,7 @@ class PGDTest():
         if datasetname=='ImageNet100':
             traindir = os.path.join(path, 'train')
             valdir = os.path.join(path, 'val')
-            train_set = datasets.ImageFolder(
+            self.data_train = datasets.ImageFolder(
                 traindir,
                 transforms.Compose([
                     transforms.RandomResizedCrop(224),
@@ -19,7 +19,7 @@ class PGDTest():
                     transforms.ToTensor(),
                 ]))
 
-            val_set = datasets.ImageFolder(
+            self.data_test = datasets.ImageFolder(
                 valdir,
                 transforms.Compose([
                     transforms.Resize(256),
@@ -28,14 +28,14 @@ class PGDTest():
                 ]))
         #print(f'loaded trainset:{len(train_set)} valset:{len(val_set)}')
             self.data_loader_train=torch.utils.data.DataLoader(
-                    train_set,
+                    self.data_train,
                     batch_size=batch_size,
                     shuffle=True,
                     num_workers=8,
                     #pin_memory=True
                 ),
             self.data_loader_test=torch.utils.data.DataLoader(
-                    val_set,
+                    self.data_test,
                     batch_size=batch_size,
                     shuffle=False,
                     num_workers=8,
@@ -90,7 +90,12 @@ class PGDTest():
             if pgdtype=='1':
                 X_test+= pgd_l1_topk(model, X_test, y_test, epsilon=12, alpha=0.05, num_iter=50, device="cuda:0", restarts=0,
                                version=0,**kwargs)
-            outputs = model(X_test, **kwargs)
+            if 't' in kwargs:
+                t = kwargs['t']
+                t = float(t.item())
+                outputs = model(**dict(input=X_test,t=t))
+            else:
+                outputs = model(X_test, **kwargs)
             _, pred = torch.max(outputs.data, 1)
             correct += torch.sum(pred == y_test.data)
             l = cost(outputs, y_test)

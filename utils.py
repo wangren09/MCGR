@@ -118,8 +118,12 @@ def test(test_loader, model, criterion, regularizer=None, **kwargs):
     for input, target in test_loader:
         input = input.cuda()
         target = target.cuda()
-
-        output = model(input, **kwargs)
+        if 't' in kwargs:
+            t = kwargs['t']
+            t = float(t.item())
+            outputs = model(**dict(input=input,t=t))
+        else:
+            output = model(input, **kwargs)
         nll = criterion(output, target)
         loss = nll.clone()
         if regularizer is not None:
@@ -144,7 +148,12 @@ def predictions(test_loader, model, **kwargs):
     targets = []
     for input, target in test_loader:
         input = input.cuda()
-        output = model(input, **kwargs)
+        if 't' in kwargs:
+            t = kwargs['t']
+            t = float(t.item())
+            outputs = model(**dict(input=input,t=t))
+        else:
+            output = model(input, **kwargs)
         probs = F.softmax(output, dim=1)
         preds.append(probs.cpu().data.numpy())
         targets.append(target.numpy())

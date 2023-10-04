@@ -75,10 +75,6 @@ if __name__ == '__main__':
         architecture_kwargs=architecture.kwargs,
     )
     pgdtest=pgdtest.PGDTest(args.dataset,args.batch_size,args.data_path)
-    model.cuda()
-    if len(args.gpus)>0:
-        gpus=list(map(int,args.gpus.split(',')))
-        model=torch.nn.DataParallel(model,device_ids=gpus)
     checkpoint = torch.load(args.ckpt)
     '''
     model.load_state_dict(checkpoint['model_state'])
@@ -93,7 +89,10 @@ if __name__ == '__main__':
         weights_dict[new_k] = v
 
     model.load_state_dict(weights_dict)
-
+    model.cuda()
+    if len(args.gpus)>0:
+        gpus=list(map(int,args.gpus.split(',')))
+        model=torch.nn.DataParallel(model,device_ids=gpus)
     T = args.num_points
     columns = ['t','Test clean acc','Test pgd_inf acc','Test pgd_2 acc','Test pgd1_acc','Train clean loss','Train pgd_inf loss','Train pgd_2 loss','Train pgd_1 loss']
     ts = np.linspace(0.0, 1.0, T)
