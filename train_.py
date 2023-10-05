@@ -126,7 +126,7 @@ weights = torch.load(args.origin_model)['model_state']
 
 weights_dict = {}
 for k, v in weights.items():
-    new_k = k.replace('module.', '') if 'module.' in key  else k
+    new_k = k.replace('module.', '') if 'module.' in k  else k
     weights_dict[new_k] = v
 
 model.load_state_dict(weights_dict)
