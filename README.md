@@ -46,7 +46,9 @@ Use the `--use_test` flag if you want to use the test set instead of validation 
 For example, use the following commands to train PreResNet  , WideResNet or ViT :
 ```bash
 #PreResNet
-python train.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100/ImageNet100] --data_path=<PATH>  --model=[PreResNet110 or PreResNet164] --epochs=150 --batch_size=128  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --gpus=0,1,2,3
+python train.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100] --data_path=<PATH>  --model=PreResNet110 --epochs=150 --batch_size=128  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] 
+
+python train.py --dir=<DIR> --dataset=ImageNet100 --data_path=<PATH>  --model=PreResNet110 --epochs=150 --batch_size=32  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --gpus=0,1,2,3
 
 #WideResNet
 train.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=WideResNet28x10 --epochs=200 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
@@ -90,7 +92,9 @@ Use the flags `--fix_end --fix_start` if you want to fix the positions of the en
 For example, use the following commands to train VGG16 or PreResNet :
 ```bash
 #PreResNet
-python  train.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100/ImageNet100] --use_test --transform=ResNet --data_path=<PATH> --model=PreResNet110 --curve=[Bezier|PolyChain] --num_bends=3  --init_start=<CKPT1> --init_end=<CKPT2> --fix_start --fix_end --epochs=200 --batch_size=128  --lr=0.03 --wd=3e-4 --pgd=[1/2/inf/msd]
+python  train.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100] --use_test --transform=ResNet --data_path=<PATH> --model=PreResNet110 --curve=[Bezier|PolyChain] --num_bends=3  --init_start=<CKPT1> --init_end=<CKPT2> --fix_start --fix_end --epochs=50 --batch_size=128  --lr=0.03 --wd=3e-4 --pgd=[1/2/inf/msd]
+
+python  train.py --dir=<DIR> --dataset=ImageNet100 --use_test --transform=ResNet --data_path=<PATH> --model=PreResNet110 --curve=[Bezier|PolyChain] --num_bends=3  --init_start=<CKPT1> --init_end=<CKPT2> --fix_start --fix_end --epochs=50 --batch_size=32  --lr=0.01 --wd=3e-4 --pgd=[1/2/inf/msd]
 
 #WideResNet
 python  train.py --dir=<DIR>  --dataset=CIFAR10 --use_test --transform=ResNet --data_path=./data --model=WideResNet28x10 --curve=Bezier --num_bends=3 --init_start=<CKPT1> --init_end=<CKPT2>--fix_start --fix_end --epochs=100 --lr=0.03 --wd=5e-4 --pgd=[1/2/inf/msd]
@@ -176,12 +180,29 @@ See the sections on [training the endpoints] for the description of other parame
 
 ```bash
 #PreResNet
-python train_.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100/ImageNet100] --data_path=<PATH>  --model=[PreResNet110 or PreResNet164] --epochs=150 --batch_size=128  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+python train_.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100] --data_path=<PATH>  --model=PreResNet110 --epochs=50 --batch_size=128  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+
+python train_.py --dir=<DIR> --dataset=ImageNet100 --data_path=<PATH>  --model=PreResNet110 --epochs=50 --batch_size=32  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
 
 #WideResNet
-train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=WideResNet28x10 --epochs=200 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=WideResNet28x10 --epochs=50 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
 
 #ViT
-python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT --epochs=150 --lr=0.001 --wd=1e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]  --origin_model=<CKPT>
+python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT --epochs=50 --lr=0.001 --wd=1e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]  --origin_model=<CKPT>
 ```
+
+
+
+### Citation
+
+```latex
+@article{wang2023robust,
+  title={Robust Mode Connectivity-Oriented Adversarial Defense: Enhancing Neural Network Robustness Against Diversified $$\backslash$ell\_p $ Attacks},
+  author={Wang, Ren and Li, Yuxuan and Liu, Sijia},
+  journal={arXiv preprint arXiv:2303.10225},
+  year={2023}
+}
+```
+
+
 
