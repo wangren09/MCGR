@@ -198,7 +198,7 @@ python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT -
 ```latex
 @article{wang2023robust,
   title={Robust Mode Connectivity-Oriented Adversarial Defense: Enhancing Neural Network Robustness Against Diversified $$\backslash$ell\_p $ Attacks},
-  author={Wang, Ren and Li, Yuxuan and Liu, Sijia},
+  author={Wang, Ren and Li, Yuxuan and Liu, Sijia and Hero, Alfred},
   journal={arXiv preprint arXiv:2303.10225},
   year={2023}
 }
