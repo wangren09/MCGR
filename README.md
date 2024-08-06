@@ -204,5 +204,8 @@ python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT -
 }
 ```
 
+### Acknowledgement
+
+We would like to express our gratitude for the support provided by NSF grants 2246157 and 2319243, as well as the ORAU Ralph E. Powe Junior Faculty Enhancement Award. Additionally, we are thankful for the computational resources made available through ACCESS and CloudBank.
 
 
