@@ -59,7 +59,7 @@ python train.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT --
 
 ### Finetuning the endpoints from an existed endpoint
 
-To  train the endpoints from an existed endpoint,you can use the following command
+To  finetune the endpoints from an existed endpoint, you can use the following command
 
 ```bash
 python  train_.py    --dir=<DIR> \
