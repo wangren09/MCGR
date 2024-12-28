@@ -1,6 +1,6 @@
 # Usage
 
-The code in this repository implements both the RMC and SRMC .
+The code in this repository implements both the RMC ERMC and SRMC .
 
 ## Curve Finding
 
@@ -57,9 +57,48 @@ train.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=WideResNet28x
 python train.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT --epochs=150 --lr=0.001 --wd=1e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]
 ```
 
+### Finetuning the endpoints from an existed endpoint
+
+To  train the endpoints from an existed endpoint,you can use the following command
+
+```bash
+python  train_.py    --dir=<DIR> \
+                     --dataset=<DATASET> \
+                     --data_path=<PATH> \
+                     --transform=<TRANSFORM> \
+                     --model=<MODEL> \
+                     --epochs=<EPOCHS> \
+                     --lr=<LR_INIT> \
+                     --wd=<WD> \
+                     --pgd=<PGD>
+                     --origin_model=<CKPT>
+                     [--use_test]
+```
+
+Parameters
+
+* ```CKPT``` &mdash; path to the existed endpoint merged from curves saved by `merge.py`
+
+See the sections on [training the endpoints] for the description of other parameters.
+
+```bash
+#PreResNet
+python train_.py --dir=<DIR> --dataset=[CIFAR10/CIFAR100] --data_path=<PATH>  --model=PreResNet110 --epochs=50 --batch_size=128  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+
+python train_.py --dir=<DIR> --dataset=ImageNet100 --data_path=<PATH>  --model=PreResNet110 --epochs=50 --batch_size=32  --lr=0.1 --wd=3e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+
+#WideResNet
+train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=WideResNet28x10 --epochs=50 --lr=0.1 --wd=5e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd] --origin_model=<CKPT>
+
+#ViT
+python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT --epochs=50 --lr=0.001 --wd=1e-4 --use_test --transform=ResNet --pgd=[1/2/inf/msd]  --origin_model=<CKPT>
+```
+
 ### Training the curves
 
-Once you have two checkpoints to use as the endpoints you can train the curve connecting them using the following comand.
+Once you have two checkpoints to use as the endpoints you can train the curve connecting them using the following command.
+
+Note that msd attacks in the current code contain all three attacks by default. If you need to reduce the number of attack types, manually adjust line 294 in the /attack/att.py file.
 
 ```bash
 python  train.py --dir=<DIR> \
@@ -207,5 +246,4 @@ python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT -
 ### Acknowledgement
 
 We would like to express our gratitude for the support provided by NSF grants 2246157 and 2319243, as well as the ORAU Ralph E. Powe Junior Faculty Enhancement Award. Additionally, we are thankful for the computational resources made available through ACCESS and CloudBank.
-
 
