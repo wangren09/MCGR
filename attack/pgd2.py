@@ -66,7 +66,7 @@ class PGD:
                 if 't' in kwargs:
                     t = kwargs['t']
                     t = float(t.item())
-                    y_batch = model(**dict(input=x_batch_batch,t=t))
+                    y_batch = model(**dict(input=x_batch,t=t))
                 else:
                     y_batch = model(x_batch,**kwargs)
                 if isinstance(y_batch, tuple):
