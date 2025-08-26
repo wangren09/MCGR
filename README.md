@@ -236,10 +236,19 @@ python train_.py --dir=<DIR>  --dataset=CIFAR10 --data_path=<PATH> --model=ViT -
 
 ```latex
 @article{wang2023robust,
-  title={Robust Mode Connectivity-Oriented Adversarial Defense: Enhancing Neural Network Robustness Against Diversified $$\backslash$ell\_p $ Attacks},
-  author={Wang, Ren and Li, Yuxuan and Liu, Sijia and Hero, Alfred},
+  title={Bridging Models to Defend: A Population-Based Strategy for Robust Adversarial Defense},
+  author={Wang, Ren and Li, Yuxuan and Chen, Can and Wang, Dakuo and Chen, Pin-Yu and Liu, Sijia and Shahidehpour, Mohammad and Hero, Alfred},
   journal={arXiv preprint arXiv:2303.10225},
-  year={2023}
+  year={2025}
+}
+
+@inproceedings{wang2024deep,
+  title={Deep Adversarial Defense Against Multilevel $-$\backslash$ell\_ $\{$P$\}$ $ Attacks},
+  author={Wang, Ren and Li, Yuxuan and Hero, Alfred},
+  booktitle={2024 IEEE 34th International Workshop on Machine Learning for Signal Processing (MLSP)},
+  pages={1--6},
+  year={2024},
+  organization={IEEE}
 }
 ```
 
